@@ -2,53 +2,225 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Chat App</title>
-  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
-  <script defer src="script.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LetterNote - Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="letternote_logo.png" type="image/png">
   <style>
-    body {
-      padding: 0;
+    :root {
+      --primary: #0f2027;
+      --secondary: #2c5364;
+      --accent: #00c6ff;
+      --gradient: linear-gradient(135deg, #0f2027 0%, #2c5364 50%, #00c6ff 100%);
+      --glass: rgba(255,255,255,0.08);
+      --shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
+      --border: 1px solid rgba(255,255,255,0.18);
+    }
+    html, body {
+      height: 100%;
       margin: 0;
+      padding: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: var(--gradient);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    body {
       display: flex;
+      align-items: center;
       justify-content: center;
+      min-height: 100vh;
+      perspective: 1200px;
     }
-
-    #message-container {
-      width: 80%;
-      max-width: 1200px;
-    }
-
-    #message-container div {
-      background-color: #CCC;
-      padding: 5px;
-    }
-
-    #message-container div:nth-child(2n) {
-      background-color: #FFF;
-    }
-
-    #send-container {
-      position: fixed;
-      padding-bottom: 30px;
-      bottom: 0;
-      background-color: white;
-      max-width: 1200px;
-      width: 80%;
+    .container {
+      background: var(--glass);
+      box-shadow: var(--shadow);
+      border-radius: 32px;
+      border: var(--border);
+      padding: 2.5rem 2rem 1.5rem 2rem;
+      width: 420px;
+      max-width: 95vw;
+      min-height: 600px;
       display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      position: relative;
+      backdrop-filter: blur(16px);
+      animation: popIn 1.2s cubic-bezier(.23,1.02,.73,1.01);
+      transform-style: preserve-3d;
     }
-
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: rotateY(40deg) scale(0.7) translateY(80px);
+      }
+      100% {
+        opacity: 1;
+        transform: rotateY(0deg) scale(1) translateY(0);
+      }
+    }
+    .container::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      z-index: -1;
+      border-radius: 36px;
+      background: conic-gradient(from 90deg at 50% 50%, #00c6ff 0%, #2c5364 50%, #0f2027 100%);
+      filter: blur(18px);
+      opacity: 0.5;
+      animation: rotateBg 8s linear infinite;
+    }
+    @keyframes rotateBg {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .header {
+      font-family: 'Orbitron', Arial, sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 2px 16px #00c6ff55, 0 1px 0 #222;
+      user-select: none;
+      transform: translateZ(20px);
+    }
+    .pattern-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.18;
+      background: repeating-linear-gradient(135deg, #00c6ff22 0 2px, transparent 2px 40px), repeating-linear-gradient(-45deg, #fff2 0 1px, transparent 1px 40px);
+      border-radius: 32px;
+      animation: patternMove 20s linear infinite;
+    }
+    @keyframes patternMove {
+      0% { background-position: 0 0, 0 0;}
+      100% { background-position: 200px 200px, -200px -200px;}
+    }
+    #message-container {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 1.2rem;
+      padding: 1rem;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.07);
+      box-shadow: 0 2px 12px 0 #00c6ff22;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      scroll-behavior: smooth;
+      font-size: 1.08rem;
+      color: #eaf6fb;
+      backdrop-filter: blur(4px);
+      border: 1px solid #00c6ff33;
+      transform: translateZ(10px);
+    }
+    #message-container div {
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #00c6ff33 0%, #2c536433 100%);
+      box-shadow: 0 1px 8px #00c6ff11;
+      animation: messageIn 0.5s cubic-bezier(.23,1.02,.73,1.01);
+      word-break: break-word;
+      backdrop-filter: blur(2px);
+    }
+    @keyframes messageIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.95);}
+      100% { opacity: 1; transform: translateY(0) scale(1);}
+    }
+    #send-container {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      margin-top: 0.5rem;
+      transform: translateZ(20px);
+    }
     #message-input {
-      flex-grow: 1;
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border-radius: 14px;
+      border: none;
+      background: rgba(255,255,255,0.13);
+      color: #fff;
+      font-size: 1.08rem;
+      outline: none;
+      box-shadow: 0 1px 8px #00c6ff22;
+      transition: background 0.2s;
+      font-family: inherit;
+      backdrop-filter: blur(2px);
+    }
+    #message-input:focus {
+      background: rgba(0,198,255,0.13);
+    }
+    #send-button {
+      background: linear-gradient(135deg, #00c6ff 0%, #2c5364 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1.08rem;
+      font-family: 'Orbitron', Arial, sans-serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #00c6ff44;
+      transition: transform 0.1s, box-shadow 0.2s;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+    #send-button::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 70% 30%, #fff8 0%, transparent 70%);
+      opacity: 0.2;
+      pointer-events: none;
+    }
+    #send-button:hover {
+      transform: scale(1.07) rotateX(8deg);
+      box-shadow: 0 4px 24px #00c6ff88;
+    }
+    /* 3D floating effect */
+    .container:hover {
+      transform: rotateY(8deg) scale(1.03) translateY(-8px);
+      box-shadow: 0 16px 48px 0 #00c6ff44, 0 2px 12px #2c536444;
+    }
+    /* Scrollbar styling */
+    #message-container::-webkit-scrollbar {
+      width: 8px;
+      background: transparent;
+    }
+    #message-container::-webkit-scrollbar-thumb {
+      background: #00c6ff44;
+      border-radius: 8px;
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+        min-height: 80vh;
+      }
+      .header {
+        font-size: 1.3rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="message-container"></div>
-  <form id="send-container">
-    <input type="text" id="message-input">
-    <button type="submit" id="send-button">Send</button>
-  </form>
+  <div class="container">
+    <div class="pattern-bg"></div>
+    <div class="header">LetterNote</div>
+    <div id="message-container"></div>
+    <form id="send-container" autocomplete="off">
+      <input id="message-input" type="text" placeholder="Type your message..." autocomplete="off" required />
+      <button id="send-button" type="submit">Send</button>
+    </form>
+  </div>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
